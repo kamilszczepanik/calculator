@@ -67,25 +67,26 @@ function App() {
   };
 
   const handleCalculate = () => {
-    const tokens =
+    const elements =
       calculations
         .replace(/([+\-*/])(-?\d+)/g, "$1 $2")
         .match(/(-?\d+)|([+*/])|(-(?!\d))/g) || [];
 
-    const calculationsLinkedList = new Yallist<string>(tokens);
-
-    if (calculationsLinkedList.length < 3)
+    if (elements.length < 3)
       throw new Error("Invalid calculation: requires at least 3 elements");
 
-    const result = calculate(calculationsLinkedList);
+    const result = calculate(elements);
 
     setPreviousCalculations(calculations);
     setCalculations(result.toString());
   };
 
-  const calculate = (calculationsLinkedList: Yallist<string>): number => {
+  const calculate = (elements: string[]): number => {
     let result = 0;
     let currentOperator: Operator | null = null;
+
+    const orderedElements = addHigherOrderOperationsToFront(elements);
+    const calculationsLinkedList = createLinkedList(orderedElements);
 
     while (calculationsLinkedList) {
       const currentElement = calculationsLinkedList.head?.value;
@@ -109,6 +110,47 @@ function App() {
     }
 
     return result;
+  };
+
+  const addHigherOrderOperationsToFront = (elements: string[]): string[] => {
+    let i = 1;
+
+    while (i < elements.length) {
+      if (elements[i] === "*" || elements[i] === "/") {
+        const leftOperand = Number(elements[i - 1]);
+        const rightOperand = Number(elements[i + 1]);
+        let result: number;
+
+        if (elements[i] === "*") {
+          result = leftOperand * rightOperand;
+        } else {
+          if (rightOperand === 0) throw new Error("Division by zero");
+          result = leftOperand / rightOperand;
+        }
+
+        elements.splice(i - 1, 3, result.toString());
+
+        i = 1;
+      } else {
+        i += 2;
+      }
+    }
+
+    return elements;
+  };
+
+  const createLinkedList = (elements: string[]): Yallist<string> => {
+    const calculationsLinkedList = new Yallist<string>(elements);
+
+    while (calculationsLinkedList.length > 0) {
+      calculationsLinkedList.shift();
+    }
+
+    for (const element of elements) {
+      calculationsLinkedList.push(element);
+    }
+
+    return calculationsLinkedList;
   };
 
   const evaluateOperation = (
