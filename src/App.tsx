@@ -1,121 +1,92 @@
 import { useState } from "react";
 import "./App.css";
-import { Button } from "./components/ui/button";
-import { WindowActions } from "./WindowActions";
+import { WindowControlButtons } from "./components/WindowControlButtons";
 import { Yallist } from "yallist";
+import { DigitButtons } from "./components/DigitButtons";
+import { OperationButtons } from "./components/OperationButtons";
+import { OPERATIONS } from "./helpers/constants";
+import { Operator } from "./helpers/types";
 
 function App() {
   const [calculations, setCalculations] = useState<string>("0");
+  const [previousCalculations, setPreviousCalculations] = useState<string>("");
 
-  const handleOnClick = (item: string) => {
+  const isOperator = (item: string) =>
+    OPERATIONS.some((action) => action.operator === item);
+
+  const handleDigitClick = (item: string) => {
     if (calculations === "0") {
       if (item !== "0") setCalculations(item);
     } else {
-      setCalculations(calculations.concat(item));
+      if (previousCalculations && calculations && !isOperator(item)) {
+        setCalculations(item);
+      } else {
+        setCalculations(calculations.concat(item));
+      }
+      setPreviousCalculations("");
     }
   };
+
+  const handleOperationClick = () => {
+    
+  }
 
   const handleCalculate = () => {
     const calculationsArray = calculations.match(/\d+|\+|-|\/|\*/g) || [];
 
     if (calculationsArray.length < 3) return;
 
-    const history = new Yallist<string>(calculationsArray);
+    const calculationsLinkedList = new Yallist<string>(calculationsArray);
 
-    let temp = 0;
-    let operator: null | "-" | "+" = null;
+    let currentTotal = 0;
+    let operator: Operator | null = null;
 
-    while (history.length) {
-      const firstItem = history.head;
-      if (!firstItem) return;
+    while (calculationsLinkedList.length) {
+      const currentNode = calculationsLinkedList.head;
 
-      switch (firstItem.value) {
-        case "-":
-          operator = "-";
-          break;
-        case "+":
-          operator = "+";
-          break;
-        default:
-          if (operator) {
-            if (operator === "+") {
-              temp += Number(firstItem.value);
-              operator = null;
-            } else if (operator === "-") {
-              temp -= Number(firstItem.value);
-              operator = null;
-            }
-          } else {
-            temp = Number(firstItem.value);
+      if (!currentNode) return;
+
+      const action = OPERATIONS.find((a) => a.operator === currentNode.value);
+
+      if (action) {
+        operator = action.operator as Operator;
+      } else {
+        if (operator) {
+          const operation = OPERATIONS.find(
+            (a) => a.operator === operator
+          )?.operation;
+          if (operation) {
+            currentTotal = operation(currentTotal, Number(currentNode.value));
+            operator = null;
           }
-          break;
+        } else {
+          currentTotal = Number(currentNode.value);
+        }
       }
 
-      history.shift();
+      calculationsLinkedList.shift();
     }
 
-    setCalculations(temp.toString());
+    setPreviousCalculations(calculations);
+    setCalculations(currentTotal.toString());
+  };
+
+  const handleClearCalculations = () => {
+    setCalculations("0");
+    setPreviousCalculations("");
   };
 
   return (
-    <div className="flex flex-col gap-2 bg-gray-700 rounded-lg p-2 w-fit">
-      <WindowActions />
-      <p className="text-right text-gray-400">{JSON.stringify(history)}</p>
-      <p className="text-right text-white">{calculations}</p>
+    <div className="flex flex-col gap-2 bg-gray-700 rounded-lg p-2 w-fit border-gray-400 border shadow-2xl">
+      <WindowControlButtons />
+      <p className="text-right text-gray-400 h-4">{previousCalculations}</p>
+      <p className="text-right text-white text-xl over">{calculations}</p>
       <div className="grid grid-cols-4 gap-1">
-        <div className="col-span-1 flex flex-col gap-1 pt-9">
-          <Button onClick={() => handleOnClick("7")} variant="number">
-            7
-          </Button>
-          <Button onClick={() => handleOnClick("4")} variant="number">
-            4
-          </Button>
-          <Button onClick={() => handleOnClick("1")} variant="number">
-            1
-          </Button>
-        </div>
-        <div className="col-span-1 flex flex-col gap-1 pt-9">
-          <Button onClick={() => handleOnClick("8")} variant="number">
-            8
-          </Button>
-          <Button onClick={() => handleOnClick("5")} variant="number">
-            5
-          </Button>
-          <Button onClick={() => handleOnClick("2")} variant="number">
-            2
-          </Button>
-          <Button onClick={() => handleOnClick("0")} variant="number">
-            0
-          </Button>
-        </div>
-        <div className="col-span-1 flex flex-col gap-1 pt-9">
-          <Button onClick={() => handleOnClick("9")} variant="number">
-            9
-          </Button>
-          <Button onClick={() => handleOnClick("6")} variant="number">
-            6
-          </Button>
-          <Button onClick={() => handleOnClick("3")} variant="number">
-            3
-          </Button>
-        </div>
-        <div className="col-span-1 flex flex-col gap-1">
-          <Button onClick={() => handleOnClick("/")} variant="action">
-            ÷
-          </Button>
-          <Button onClick={() => handleOnClick("*")} variant="action">
-            ×
-          </Button>
-          <Button onClick={() => handleOnClick("-")} variant="action">
-            -
-          </Button>
-          <Button onClick={() => handleOnClick("+")} variant="action">
-            +
-          </Button>
-          <Button onClick={() => handleCalculate()} variant="action">
-            =
-          </Button>
-        </div>
+        <DigitButtons
+          handleDigitClick={handleDigitClick}
+          handleClearCalculationsClick={handleClearCalculations}
+        />
+        <OperationButtons handleCalculate={handleCalculate} handleOperationClick={handleOperationClick} />
       </div>
     </div>
   );
