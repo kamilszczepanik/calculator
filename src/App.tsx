@@ -1,33 +1,54 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 import { Button } from "./components/ui/button";
+import { WindowActions } from "./WindowActions";
 
 function App() {
   const [output, setOutput] = useState(0);
-  const numbers: string[] = [];
   const history: string[] = [];
   const [item, setItem] = useState();
 
-  // const handleOnClick = (item: string) => {
-  //   if (item) {
-  //     setItem(item);
-  //     history.push(item);
-  //   }
-  // };
+  const handleOnClick = (item: string) => {
+    if (item) {
+      history.push(item);
+    }
+    console.log(history);
+  };
 
-  // useEffect(() => {
-  //   if (item === "=") {
-  //     for(let )
-  //   }
-  // }, [item]);
+  const handleCalculate = () => {
+    let temp = 0;
+    let operator: null | "-" | "+" = null;
+
+    while (history.length > 0) {
+      const lastItem = history.pop();
+
+      switch (lastItem) {
+        case "-":
+          operator = "-";
+          break;
+        case "+":
+          operator = "+";
+          break;
+        default:
+          if (operator) {
+            if (operator === "+") {
+              temp += Number(lastItem);
+            } else if (operator === "-") {
+              temp -= Number(lastItem);
+            }
+          } else {
+            temp = Number(lastItem);
+          }
+          break;
+      }
+    }
+    console.log("temp", temp);
+    return temp;
+  };
 
   return (
     <div className="flex flex-col gap-2 bg-gray-700 rounded-lg p-2 w-fit">
-      <div className="flex gap-1">
-        <button className="w-2 h-2 rounded-full bg-red-400" />
-        <button className="w-2 h-2 rounded-full bg-yellow-400" />
-        <button className="w-2 h-2 rounded-full bg-gray-500" />
-      </div>
+      <WindowActions />
       <p className="text-right text-gray-400">{JSON.stringify(history)}</p>
       <p className="text-right text-white">{JSON.stringify(history)}</p>
       <div className="grid grid-cols-4 gap-1">
