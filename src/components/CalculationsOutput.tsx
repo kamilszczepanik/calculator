@@ -11,7 +11,7 @@ export const CalculationsOutput = ({
     <div className="relative overflow-hidden max-w-36">
       <div className="relative">
         <div className="flex justify-end">
-          <p className="text-gray-400 h-4 whitespace-nowrap ml-auto">
+          <p className="text-gray-400 h-4 whitespace-nowrap ml-auto my-2.5 text-lg">
             {previousCalculations}
           </p>
         </div>
@@ -20,7 +20,7 @@ export const CalculationsOutput = ({
 
       <div className="relative">
         <div className="flex justify-end">
-          <p className="text-white text-xl whitespace-nowrap ml-auto">
+          <p className="text-white text-2xl whitespace-nowrap ml-auto">
             {calculations}
           </p>
         </div>
