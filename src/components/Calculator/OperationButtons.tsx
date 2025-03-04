@@ -1,6 +1,6 @@
-import { OPERATIONS } from "../utils/constants";
-import { Operator } from "../utils/types";
-import { Button } from "./ui/button";
+import { OPERATIONS } from "../../utils/constants";
+import { Operator } from "../../utils/types";
+import { Button } from "../ui/button";
 
 interface Props {
   handleOperationClick: (operator: Operator) => void;

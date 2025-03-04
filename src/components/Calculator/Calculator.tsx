@@ -3,8 +3,8 @@ import { CSS } from "@dnd-kit/utilities";
 import { CalculationsOutput } from "./CalculationsOutput";
 import { DigitButtons } from "./DigitButtons";
 import { OperationButtons } from "./OperationButtons";
-import { useCalculator } from "../hooks/useCalculator";
-import { Position } from "../utils/types";
+import { useCalculator } from "../../hooks/useCalculator";
+import { Position } from "../../utils/types";
 import { WindowControlButtons } from "./WindowControlButtons";
 
 export const Calculator = ({ position }: { position: Position }) => {

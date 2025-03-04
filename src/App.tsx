@@ -7,7 +7,7 @@ import {
   PointerSensor,
   DragEndEvent,
 } from "@dnd-kit/core";
-import { Calculator } from "./components/Calculator";
+import { Calculator } from "./components/Calculator/Calculator";
 import { Position } from "./utils/types";
 
 function App() {
