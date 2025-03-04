@@ -1,5 +1,5 @@
-import { OPERATIONS } from "../helpers/constants";
-import { Operator } from "../helpers/types";
+import { OPERATIONS } from "../utils/constants";
+import { Operator } from "../utils/types";
 import { Button } from "./ui/button";
 
 interface Props {

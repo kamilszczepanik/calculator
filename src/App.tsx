@@ -4,9 +4,10 @@ import { WindowControlButtons } from "./components/WindowControlButtons";
 import { Yallist } from "yallist";
 import { DigitButtons } from "./components/DigitButtons";
 import { OperationButtons } from "./components/OperationButtons";
-import { OPERATIONS } from "./helpers/constants";
-import { Operator } from "./helpers/types";
+import { OPERATIONS } from "./utils/constants";
+import { Operator } from "./utils/types";
 import { CalculationsOutput } from "./components/CalculationsOutput";
+import { isOperator } from "./utils/helpers";
 
 function App() {
   const [calculations, setCalculations] = useState<string>("0");
@@ -26,18 +27,52 @@ function App() {
   };
 
   const handleOperationClick = (operator: Operator) => {
-    if (calculations === "0") {
-      setCalculations(operator);
-    } else {
+    const lastElement = calculations[calculations.length - 1];
+    const secondToLastElement = calculations[calculations.length - 2];
+
+    if (
+      lastElement === "-" &&
+      secondToLastElement &&
+      isOperator(secondToLastElement)
+    ) {
+      setCalculations((prevCalculations) =>
+        prevCalculations.slice(0, -2).concat(operator)
+      );
+      return;
+    }
+
+    if (
+      operator === "-" &&
+      lastElement &&
+      isOperator(lastElement) &&
+      lastElement !== "-"
+    ) {
       setCalculations(calculations.concat(operator));
       setPreviousCalculations("");
+      return;
+    }
+
+    if (isOperator(lastElement)) {
+      setCalculations((prevCalculations) =>
+        prevCalculations.slice(0, -1).concat(operator)
+      );
+    } else {
+      if (calculations === "0") {
+        setCalculations(operator);
+      } else {
+        setCalculations(calculations.concat(operator));
+        setPreviousCalculations("");
+      }
     }
   };
 
   const handleCalculate = () => {
-    const calculationsLinkedList = new Yallist<string>(
-      calculations.match(/\d+|\+|-|\/|\*/g) || []
-    );
+    const tokens =
+      calculations
+        .replace(/([+\-*/])(-?\d+)/g, "$1 $2")
+        .match(/(-?\d+)|([+*/])|(-(?!\d))/g) || [];
+
+    const calculationsLinkedList = new Yallist<string>(tokens);
 
     if (calculationsLinkedList.length < 3)
       throw new Error("Invalid calculation: requires at least 3 elements");
@@ -57,9 +92,7 @@ function App() {
 
       if (!currentElement) break;
 
-      const isOperator = OPERATIONS.some((a) => a.operator === currentElement);
-
-      if (isOperator) {
+      if (isOperator(currentElement)) {
         currentOperator = currentElement as Operator;
       } else {
         const operand = Number(currentElement);
