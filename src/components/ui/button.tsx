@@ -10,7 +10,7 @@ interface Props {
 export const Button = ({ variant, className, children, onClick }: Props) => {
   return (
     <button
-      className={`rounded-full w-8 h-8 text-white ${
+      className={`rounded-full w-8 h-8 text-white active:brightness-150 ${
         variant === "action" ? "bg-orange-400" : "bg-gray-500"
       } ${className}`}
       onClick={onClick}

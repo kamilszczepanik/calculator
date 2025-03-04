@@ -1,28 +1,35 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import "./App.css";
 import { Button } from "./components/ui/button";
 import { WindowActions } from "./WindowActions";
+import { Yallist } from "yallist";
 
 function App() {
-  const [output, setOutput] = useState(0);
-  const history: string[] = [];
-  const [item, setItem] = useState();
+  const [calculations, setCalculations] = useState<string>("0");
 
   const handleOnClick = (item: string) => {
-    if (item) {
-      history.push(item);
+    if (calculations === "0") {
+      if (item !== "0") setCalculations(item);
+    } else {
+      setCalculations(calculations.concat(item));
     }
-    console.log(history);
   };
 
   const handleCalculate = () => {
+    const calculationsArray = calculations.match(/\d+|\+|-|\/|\*/g) || [];
+
+    if (calculationsArray.length < 3) return;
+
+    const history = new Yallist<string>(calculationsArray);
+
     let temp = 0;
     let operator: null | "-" | "+" = null;
 
-    while (history.length > 0) {
-      const lastItem = history.pop();
+    while (history.length) {
+      const firstItem = history.head;
+      if (!firstItem) return;
 
-      switch (lastItem) {
+      switch (firstItem.value) {
         case "-":
           operator = "-";
           break;
@@ -32,25 +39,29 @@ function App() {
         default:
           if (operator) {
             if (operator === "+") {
-              temp += Number(lastItem);
+              temp += Number(firstItem.value);
+              operator = null;
             } else if (operator === "-") {
-              temp -= Number(lastItem);
+              temp -= Number(firstItem.value);
+              operator = null;
             }
           } else {
-            temp = Number(lastItem);
+            temp = Number(firstItem.value);
           }
           break;
       }
+
+      history.shift();
     }
-    console.log("temp", temp);
-    return temp;
+
+    setCalculations(temp.toString());
   };
 
   return (
     <div className="flex flex-col gap-2 bg-gray-700 rounded-lg p-2 w-fit">
       <WindowActions />
       <p className="text-right text-gray-400">{JSON.stringify(history)}</p>
-      <p className="text-right text-white">{JSON.stringify(history)}</p>
+      <p className="text-right text-white">{calculations}</p>
       <div className="grid grid-cols-4 gap-1">
         <div className="col-span-1 flex flex-col gap-1 pt-9">
           <Button onClick={() => handleOnClick("7")} variant="number">
@@ -73,7 +84,7 @@ function App() {
           <Button onClick={() => handleOnClick("2")} variant="number">
             2
           </Button>
-          <Button onClick={() => handleOnClick("2")} variant="number">
+          <Button onClick={() => handleOnClick("0")} variant="number">
             0
           </Button>
         </div>
