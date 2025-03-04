@@ -1,8 +1,9 @@
 import { OPERATIONS } from "../helpers/constants";
+import { Operator } from "../helpers/types";
 import { Button } from "./ui/button";
 
 interface Props {
-  handleOperationClick: (symbol: string) => void;
+  handleOperationClick: (operator: Operator) => void;
   handleCalculate: () => void;
 }
 
